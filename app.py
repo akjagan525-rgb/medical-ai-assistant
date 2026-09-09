@@ -1,4 +1,5 @@
 import streamlit as st
+from concurrent.futures import ThreadPoolExecutor
 from analyzer import analyze_symptoms
 from video_service import get_video_url_for_disease
 
@@ -12,7 +13,7 @@ st.set_page_config(
 top_col1, top_col2 = st.columns([3, 1])
 with top_col1:
     st.title("🩺 AI மருத்துவ உதவியாளர் / Medical AI Assistant")
-    st.write("அறிகுறிகள் அல்லது எந்த ஒரு மருத்துவக் கேள்வியையும் கேளுங்கள் — உடனடி விளக்கம் மற்றும் வீடியோவை தமிழில் பெறுங்கள்.")
+    st.write("அறிகுறிகள் அல்லது மருத்துவக் கேள்விகளை உள்ளிடுங்கள் — உடனடி விளக்கம் மற்றும் வீடியோவை தமிழில் பெறுங்கள்.")
 with top_col2:
     language = st.selectbox("🌐 மொழி / Language:", ["Tamil (தமிழ்)", "English"])
 
@@ -54,8 +55,15 @@ if st.button(btn_label, type="primary"):
     if not user_query.strip():
         st.warning("தயவுசெய்து ஏதேனும் கேள்வியை அல்லது அறிகுறிகளை உள்ளிடவும்." if is_tamil else "Please enter your question or symptoms first.")
     else:
-        with st.spinner("விளக்கம் மற்றும் வீடியோ தயாராகிறது..." if is_tamil else "Analyzing query and preparing video..."):
-            result = analyze_symptoms(user_query, language=lang_code)
+        with st.spinner("விளக்கம் மற்றும் வீடியோ தயாராகிறது (Searching AI & Video in parallel)..." if is_tamil else "Analyzing query and searching video in parallel..."):
+            
+            # RUN IN PARALLEL: AI Analysis & YouTube Search run simultaneously!
+            with ThreadPoolExecutor(max_workers=2) as executor:
+                ai_future = executor.submit(analyze_symptoms, user_query, lang_code)
+                video_future = executor.submit(get_video_url_for_disease, user_query, lang_code)
+
+                result = ai_future.result()
+                video_url = video_future.result()
 
             # Emergency Alert
             if result.is_emergency:
@@ -91,10 +99,6 @@ if st.button(btn_label, type="primary"):
 
             with right_col:
                 st.subheader("🎥 விளக்க வீடியோ (Educational Video)")
-                
-                # Fetch matching dynamic Tamil/English video
-                video_url = get_video_url_for_disease(result.search_keyword_en, language=lang_code)
-                
                 st.video(video_url)
                 st.markdown(f"👉 [யூடியூபில் பார்க்க / Open in YouTube]({video_url})")
                 st.caption(f"Topic: **{display_title}**")
