@@ -1,60 +1,62 @@
+import urllib.parse
 import streamlit as st
 from analyzer import analyze_symptoms
-from video_service import get_video_data
 
 st.set_page_config(
-    page_title="AI Doctor & Science Explainer (தமிழ் / English)",
-    page_icon="🩺",
+    page_title="AI Doctor & Science Explainer",
+    page_icon="⚡",
     layout="wide"
 )
 
 # Header & Language Choice
 top_col1, top_col2 = st.columns([3, 1])
 with top_col1:
-    st.title("🩺 AI மருத்துவ & அறிவியல் உதவியாளர்")
-    st.write("மருத்துவ அறிகுறிகள், உடல் சார்ந்த சந்தேகங்கள் அல்லது ஏதேனும் சுவாரஸ்யமான கேள்விகளைக் கேளுங்கள் — உடனடி பதில் & வீடியோவை தமிழில் பெறுங்கள்!")
+    st.title("⚡ AI மருத்துவர் & அறிவியல் விளக்கம்")
+    st.write("மருத்துவ அறிகுறிகள் அல்லது எந்த ஒரு விசித்திரமான கேள்வியையும் கேளுங்கள் — **1 வினாடியில் பதில் & வீடியோ!**")
 with top_col2:
     language = st.selectbox("🌐 மொழி / Language:", ["Tamil (தமிழ்)", "English"])
 
 is_tamil = "Tamil" in language
 lang_code = "Tamil" if is_tamil else "English"
 
-# Fun & Medical Sample Buttons
-st.markdown("**மாதிரிகள் / Try Asking:**")
-q1, q2, q3 = st.columns(3)
+# Fun Silly & Medical Examples
+st.markdown("**வேடிக்கையான & மருத்துவ கேள்விகள் / Try These:**")
+q1, q2, q3, q4 = st.columns(4)
 preset_text = ""
 
 if is_tamil:
-    if q1.button("🧅 வெங்காயம் நறுக்கும்போது ஏன் கண்ணீர் வருகிறது?"):
-        preset_text = "வெங்காயம் நறுக்கும்போது கண்களில் ஏன் தண்ணீர் வருகிறது? அதன் அறிவியல் காரணம் என்ன?"
-    if q2.button("🥱 கொட்டாவி ஏன் வருகிறது?"):
-        preset_text = "மனிதர்களுக்கு கொட்டாவி (yawn) ஏன் வருகிறது? ஒருவரைப் பார்த்தால் நமக்கும் ஏன் வருகிறது?"
-    if q3.button("🔥 நெஞ்செரிச்சல் (Acid Reflux)"):
-        preset_text = "சாப்பிட்ட பிறகு நெஞ்சில் கடுமையான எரிச்சல் மற்றும் புளித்த ஏப்பம் வருகிறது. என்ன காரணம்?"
+    if q1.button("🥱 கொட்டாவி ஏன் வருது?"):
+        preset_text = "மனிதர்களுக்கு கொட்டாவி (yawn) ஏன் வருகிறது? ஒருவரை பார்த்தால் நமக்கும் ஏன் வருகிறது?"
+    if q2.button("🧅 வெங்காயம் நறுக்கினா ஏன் அழுகை?"):
+        preset_text = "வெங்காயம் நறுக்கும்போது கண்களில் ஏன் தண்ணீர் வருகிறது?"
+    if q3.button("💨 விக்கல் (Hiccup) ஏன் வருகிறது?"):
+        preset_text = "விக்கல் ஏன் வருகிறது? அதை உடனே நிறுத்த என்ன செய்ய வேண்டும்?"
+    if q4.button("🔥 நெஞ்செரிச்சல் (Acid Reflux)"):
+        preset_text = "சாப்பிட்ட பிறகு நெஞ்சில் கடுமையான எரிச்சல் மற்றும் புளித்த ஏப்பம் வருவது ஏன்?"
 else:
-    if q1.button("🧅 Why do onions make us cry?"):
-        preset_text = "Why do onions make our eyes water when cutting them? What is the chemical reason?"
-    if q2.button("🥱 Why do humans yawn?"):
-        preset_text = "Why do we yawn, and why is yawning contagious when we see someone else do it?"
-    if q3.button("🔥 Heartburn / Acid Reflux"):
-        preset_text = "Burning pain behind breastbone after meals and acid regurgitation. What causes this?"
+    if q1.button("🥱 Why do we yawn?"):
+        preset_text = "Why do humans yawn and why is it contagious?"
+    if q2.button("🧅 Why do onions make us cry?"):
+        preset_text = "Why do onions make our eyes water when cutting them?"
+    if q3.button("💨 Why do we get hiccups?"):
+        preset_text = "Why do we get hiccups and how to stop them instantly?"
+    if q4.button("🔥 Acid Reflux / GERD"):
+        preset_text = "Burning pain in chest and acid taste after eating."
 
 # Input Box
-input_label = "உங்கள் கேள்வி அல்லது அறிகுறிகளை தட்டச்சு செய்யவும் (எந்த கேள்வியானாலும் கேட்கலாம்):" if is_tamil else "Ask ANY question, silly curious inquiry, or medical symptoms:"
+input_label = "உங்கள் கேள்வி (எந்த வேடிக்கையான கேள்வியானாலும் கேட்கலாம்):" if is_tamil else "Ask ANY question (even silly, funny body questions):"
 user_query = st.text_area(
     input_label,
     value=preset_text,
-    placeholder="உதாரணம்: கொட்டாவி ஏன் வருது? / தலைவலி ஏன் வருது? / தூக்கத்தில் ஏன் கனவு காண்கிறோம்?" if is_tamil else "e.g. Why do we sneeze? / Why do we get headaches? / Why is blood red?",
-    height=90
+    placeholder="உதாரணம்: விக்கல் ஏன் வருது? / தூக்கத்துல ஏன் கனவு வருது? / தலைவலி ஏன் வருது?" if is_tamil else "e.g. Why do we sneeze? / Why do we dream? / Why do our fingers wrinkle in water?",
+    height=80
 )
 
-btn_label = "🔍 பதில் & வீடியோவை காண்க" if is_tamil else "🔍 Get Answer & Video"
-
-if st.button(btn_label, type="primary"):
+if st.button("⚡ உடனடி பதில் & வீடியோ காண்க (Get Answer)", type="primary"):
     if not user_query.strip():
-        st.warning("தயவுசெய்து ஏதேனும் கேள்வியை தட்டச்சு செய்யவும்." if is_tamil else "Please type a question or symptoms first.")
+        st.warning("தயவுசெய்து ஏதேனும் கேள்வியை தட்டச்சு செய்யவும்." if is_tamil else "Please type a question first.")
     else:
-        with st.spinner("விளக்கம் மற்றும் வீடியோ தயாராகிறது..." if is_tamil else "Finding answer and video..."):
+        with st.spinner("விளக்கம் தயாராகிறது..." if is_tamil else "Answering instantly..."):
             result = analyze_symptoms(user_query, language=lang_code)
 
             if result.is_emergency:
@@ -62,39 +64,42 @@ if st.button(btn_label, type="primary"):
                 st.stop()
 
             display_title = f"{result.title_ta} ({result.title_en})" if is_tamil else f"{result.title_en}"
-            st.success(f"💡 **[{result.category}]**: {display_title}")
+            st.success(f"💡 **{display_title}**")
 
-            # 2-Column Layout
-            left_col, right_col = st.columns([1, 1], gap="large")
+            # 2-Column Fast Layout
+            left_col, right_col = st.columns([3, 2], gap="large")
 
             with left_col:
-                st.subheader("📖 எளிய விளக்கம்" if is_tamil else "📖 Explanation")
-                st.write(result.main_answer)
+                st.subheader("📖 எளிய பதில்" if is_tamil else "📖 Quick Answer")
+                st.write(result.answer)
 
-                st.subheader("🔬 அறிவியல் / உயிரியல் காரணங்கள்" if is_tamil else "🔬 Scientific & Biological Reasons")
-                for point in result.reasons_or_points:
+                st.subheader("🔬 அறிவியல் & உயிரியல் காரணம்" if is_tamil else "🔬 Why It Happens (Science)")
+                for point in result.why_it_happens:
                     st.markdown(f"- {point}")
 
-                st.subheader("💡 சுவாரஸ்யமான தகவல்கள் & குறிப்புகள்" if is_tamil else "💡 Fun Facts & Tips")
-                for item in result.fun_facts_or_tips:
-                    st.markdown(f"- {item}")
+                st.subheader("💡 சுவாரஸ்யமான உண்மை / குறிப்பு" if is_tamil else "💡 Fun Fact / Tip")
+                st.info(result.fun_fact_or_tip)
 
             with right_col:
                 st.subheader("🎥 இதற்கான வீடியோ (Video for this topic)")
                 
-                search_query = result.tamil_video_search if is_tamil else result.english_video_search
-                embed_url, direct_youtube_url = get_video_data(search_query, result.title_en)
-
-                st.video(embed_url)
+                # Dynamic YouTube search query
+                encoded_query = urllib.parse.quote(result.youtube_search)
+                direct_youtube_url = f"https://www.youtube.com/results?search_query={encoded_query}"
 
                 st.markdown(f"""
-                <a href="{direct_youtube_url}" target="_blank" style="text-decoration:none;">
-                    <div style="background-color:#FF0000;color:white;padding:12px;border-radius:8px;text-align:center;font-weight:bold;margin-top:10px;">
-                        ▶️ {'இதற்கான தமிழ் வீடியோக்களை நேரடியாக யூடியூபில் பார்க்க' if is_tamil else '▶️ Watch Top Videos for this on YouTube'}
-                    </div>
-                </a>
+                <div style="background:#1E1E1E;padding:18px;border-radius:12px;border:1px solid #333;text-align:center;">
+                    <p style="color:#FFF;font-size:16px;margin-bottom:12px;">
+                        🎬 <b>{result.youtube_search}</b>
+                    </p>
+                    <a href="{direct_youtube_url}" target="_blank" style="text-decoration:none;">
+                        <button style="background-color:#FF0000;color:white;padding:14px 22px;border:none;border-radius:8px;font-size:16px;font-weight:bold;cursor:pointer;width:100%;">
+                            ▶️ {'யூடியூபில் வீடியோ பார்க்க கிளிக் செய்க' if is_tamil else '▶️ Watch Top Videos on YouTube'}
+                        </button>
+                    </a>
+                </div>
                 """, unsafe_allow_html=True)
-                st.caption(f"Topic: **{search_query}**")
+                st.caption("Opens the best Tamil/English explanation videos on YouTube instantly.")
 
 st.divider()
-st.caption("⚠️ **மருத்துவ மறுப்பு (Disclaimer)**: இந்த செயலி கல்வி மற்றும் அறிவியல் தகவல் நோக்கங்களுக்காக மட்டுமே.")
+st.caption("⚡ Powered by Gemini Flash • Zero lag • Answers all medical & curious questions.")
