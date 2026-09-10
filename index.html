@@ -1,0 +1,132 @@
+﻿<!DOCTYPE html>
+<html lang="ta">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Doctor & Science Explainer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen p-4 md:p-8 font-sans">
+
+  <div class="max-w-4xl mx-auto">
+    <div class="flex flex-col md:flex-row justify-between items-center mb-6 pb-4 border-b border-slate-700 gap-4">
+      <div>
+        <h1 class="text-2xl md:text-3xl font-extrabold text-teal-400 flex items-center gap-2">
+          🩺 AI மருத்துவ & அறிவியல் உதவியாளர்
+        </h1>
+        <p class="text-sm text-slate-400 mt-1">Medical Symptoms & Curious Science Explainer</p>
+      </div>
+
+      <div class="flex items-center gap-2 bg-slate-800 p-2 rounded-xl border border-slate-700">
+        <i class="fa-solid fa-globe text-teal-400"></i>
+        <select id="langSelect" class="bg-transparent text-white text-sm outline-none font-medium cursor-pointer">
+          <option value="Tamil" class="bg-slate-800">தமிழ் (Tamil)</option>
+          <option value="English" class="bg-slate-800">English</option>
+        </select>
+      </div>
+    </div>
+
+    <p class="text-xs uppercase tracking-wider text-slate-400 mb-2 font-semibold">மாதிரிகள் / Quick Examples:</p>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
+      <button onclick="setQuery('வெங்காயம் நறுக்கும்போது ஏன் கண்ணீர் வருகிறது?')" class="bg-slate-800 hover:bg-slate-700 text-xs p-2.5 rounded-lg border border-slate-700 text-left transition">🧅 வெங்காயம் & கண்ணீர்</button>
+      <button onclick="setQuery('கொட்டாவி (yawn) ஏன் வருகிறது?')" class="bg-slate-800 hover:bg-slate-700 text-xs p-2.5 rounded-lg border border-slate-700 text-left transition">🥱 கொட்டாவி ஏன்?</button>
+      <button onclick="setQuery('சாப்பிட்ட பிறகு நெஞ்செரிச்சல் மற்றும் புளித்த ஏப்பம்')" class="bg-slate-800 hover:bg-slate-700 text-xs p-2.5 rounded-lg border border-slate-700 text-left transition">🔥 நெஞ்செரிச்சல் (GERD)</button>
+      <button onclick="setQuery('விக்கல் (hiccup) ஏன் வருகிறது? அதை நிறுத்த வழி')" class="bg-slate-800 hover:bg-slate-700 text-xs p-2.5 rounded-lg border border-slate-700 text-left transition">💨 விக்கல் தீர வழி</button>
+    </div>
+
+    <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 shadow-lg mb-6">
+      <textarea id="userQuery" rows="3" class="w-full bg-slate-900 text-slate-100 p-3 rounded-xl border border-slate-700 focus:border-teal-400 outline-none text-sm placeholder-slate-500" placeholder="அறிகுறிகள் அல்லது எந்த ஒரு அறிவியல் கேள்வியையும் கேளுங்கள்... (e.g. Why do we sneeze? / தலைவலி ஏன் வருது?)"></textarea>
+
+      <button id="submitBtn" onclick="askAI()" class="w-full mt-3 bg-teal-500 hover:bg-teal-600 text-slate-950 font-bold py-3 rounded-xl transition flex justify-center items-center gap-2 shadow-md">
+        <span>⚡ பதில் & வீடியோ காண்க (Get Answer & Video)</span>
+      </button>
+    </div>
+
+    <div id="loading" class="hidden text-center py-8">
+      <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-teal-400 border-t-transparent"></div>
+      <p class="text-sm text-slate-400 mt-2">விளக்கம் மற்றும் வீடியோ தயாராகிறது...</p>
+    </div>
+
+    <div id="resultBox" class="hidden grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="md:col-span-2 bg-slate-800 p-6 rounded-2xl border border-slate-700 space-y-4">
+        <h2 id="resTitle" class="text-xl font-bold text-teal-300"></h2>
+        
+        <div>
+          <h3 class="text-sm font-semibold text-slate-400 mb-1">📖 எளிய பதில்:</h3>
+          <p id="resAnswer" class="text-slate-200 text-sm leading-relaxed"></p>
+        </div>
+
+        <div>
+          <h3 class="text-sm font-semibold text-slate-400 mb-1">🔬 அறிவியல் / உயிரியல் காரணங்கள்:</h3>
+          <ul id="resPoints" class="list-disc list-inside text-sm text-slate-300 space-y-1"></ul>
+        </div>
+
+        <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/60">
+          <h3 class="text-xs font-semibold text-amber-400 mb-1">💡 சுவாரஸ்யமான உண்மை / குறிப்பு:</h3>
+          <p id="resTip" class="text-slate-300 text-xs"></p>
+        </div>
+      </div>
+
+      <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col justify-center items-center text-center">
+        <div class="w-16 h-16 bg-red-600/20 text-red-500 rounded-full flex items-center justify-center text-2xl mb-3">
+          <i class="fa-brands fa-youtube"></i>
+        </div>
+        <h3 class="text-base font-bold text-white mb-2">இதற்கான விளக்கம் வீடியோ</h3>
+        <p id="videoTopic" class="text-xs text-slate-400 mb-4"></p>
+
+        <a id="videoLink" href="#" target="_blank" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl transition flex items-center justify-center gap-2 shadow-lg">
+          <i class="fa-solid fa-play"></i>
+          <span>வீடியோவை யூடியூபில் காண்க</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function setQuery(text) {
+      document.getElementById('userQuery').value = text;
+    }
+
+    async function askAI() {
+      const query = document.getElementById('userQuery').value.trim();
+      const language = document.getElementById('langSelect').value;
+      if (!query) return alert('தயவுசெய்து ஏதேனும் கேள்வியை தட்டச்சு செய்யவும்.');
+
+      document.getElementById('loading').classList.remove('hidden');
+      document.getElementById('resultBox').classList.add('hidden');
+
+      try {
+        const response = await fetch('/.netlify/functions/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query, language })
+        });
+
+        const data = await response.json();
+
+        document.getElementById('resTitle').innerText = data.title_ta ? `${data.title_ta} (${data.title_en})` : data.title_en;
+        document.getElementById('resAnswer').innerText = data.answer;
+        
+        const pointsList = document.getElementById('resPoints');
+        pointsList.innerHTML = '';
+        (data.why_it_happens || []).forEach(pt => {
+          const li = document.createElement('li');
+          li.innerText = pt;
+          pointsList.appendChild(li);
+        });
+
+        document.getElementById('resTip').innerText = data.fun_fact_or_tip || '';
+        document.getElementById('videoTopic').innerText = data.youtube_search || query;
+        document.getElementById('videoLink').href = `https://www.youtube.com/results?search_query=${encodeURIComponent(data.youtube_search || query)}`;
+
+        document.getElementById('resultBox').classList.remove('hidden');
+      } catch (err) {
+        alert('பிழை ஏற்பட்டது: ' + err.message);
+      } finally {
+        document.getElementById('loading').classList.add('hidden');
+      }
+    }
+  </script>
+</body>
+</html>
