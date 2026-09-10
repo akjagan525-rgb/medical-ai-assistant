@@ -1,8 +1,10 @@
 exports.handler = async function(event, context) {
+  // Only allow POST requests
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method Not Allowed" };
   }
 
+  // CORS headers so browser can call this function
   const headers = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers": "Content-Type",
@@ -11,45 +13,24 @@ exports.handler = async function(event, context) {
 
   try {
     const { query, language } = JSON.parse(event.body);
+
+    // API key stays 100% secret on Netlify server, never reaches browser
     const API_KEY = process.env.GEMINI_API_KEY;
 
     if (!API_KEY) {
       return {
         statusCode: 500,
         headers,
-        body: JSON.stringify({ error: "API key not configured in Netlify Environment Variables." })
+        body: JSON.stringify({ error: "API key not configured. Please add GEMINI_API_KEY in Netlify Environment Variables." })
       };
     }
 
     const prompt = `
-    You are a friendly, helpful AI assistant who is also an expert Doctor and Science Explainer.
+    You are a friendly, witty, all-knowing AI Doctor and Science Explainer.
+    Answer this question: "${query}" in language: ${language}.
     
-    The user said: "${query}"
-    Language to respond in: ${language}
-    
-    STEP 1 - Classify the message into ONE of these types:
-    - "greeting": Hi, hello, how are you, good morning, thanks, etc.
-    - "general_chat": General conversation not related to health or science.
-    - "medical_or_science": Health symptoms, body questions, science curiosities, medical conditions, diet, wellness, etc.
-    
-    STEP 2 - Based on the type, respond DIFFERENTLY:
-    
-    If type is "greeting" or "general_chat":
-    Return this JSON:
+    Return strictly a valid JSON object:
     {
-      "type": "chat",
-      "title_en": "Hello!",
-      "title_ta": "வணக்கம்!",
-      "answer": "A warm, friendly conversational reply in ${language}. If greeting, say hello back and briefly mention you can answer any medical, health or science question.",
-      "why_it_happens": [],
-      "fun_fact_or_tip": "",
-      "youtube_search": ""
-    }
-    
-    If type is "medical_or_science":
-    Return this JSON:
-    {
-      "type": "medical",
       "title_en": "Title in English",
       "title_ta": "Title in Tamil (தமிழ்)",
       "answer": "Clear, engaging 2-sentence explanation in ${language}",
@@ -57,10 +38,10 @@ exports.handler = async function(event, context) {
       "fun_fact_or_tip": "1 fun fact or tip in ${language}",
       "youtube_search": "Exact YouTube search query for this topic"
     }
-    
     Output ONLY valid JSON. No markdown. No extra text.
     `;
 
+    // Call Gemini API securely from server side
     const models = [
       "gemini-3.6-flash",
       "gemini-flash-latest",
@@ -103,7 +84,7 @@ exports.handler = async function(event, context) {
 
       } catch (e) {
         lastError = e;
-        continue;
+        continue; // Try next model automatically
       }
     }
 
