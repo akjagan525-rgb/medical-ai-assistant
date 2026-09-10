@@ -1,5 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+  <style>
+  /* Completely hides Netlify badge / drawer */
+  #netlify-drawer,
+  [data-netlify-drawer],
+  .netlify-badge,
+  iframe[src*="netlify"],
+  div[id*="netlify"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+</style>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
