@@ -1,5 +1,5 @@
-﻿<!DOCTYPE html>
-<html lang="ta">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,88 +10,165 @@
 <body class="bg-slate-900 text-slate-100 min-h-screen p-4 md:p-8 font-sans">
 
   <div class="max-w-4xl mx-auto">
+    <!-- Header -->
     <div class="flex flex-col md:flex-row justify-between items-center mb-6 pb-4 border-b border-slate-700 gap-4">
       <div>
-        <h1 class="text-2xl md:text-3xl font-extrabold text-teal-400 flex items-center gap-2">
-          🩺 AI மருத்துவ & அறிவியல் உதவியாளர்
+        <h1 id="uiTitle" class="text-2xl md:text-3xl font-extrabold text-teal-400 flex items-center gap-2">
+          🩺 AI Doctor & Science Explainer
         </h1>
-        <p class="text-sm text-slate-400 mt-1">Medical Symptoms & Curious Science Explainer</p>
+        <p id="uiSubtitle" class="text-sm text-slate-400 mt-1">Medical Symptoms & Curious Science Explainer</p>
       </div>
 
+      <!-- Language Selector (English is Default) -->
       <div class="flex items-center gap-2 bg-slate-800 p-2 rounded-xl border border-slate-700">
         <i class="fa-solid fa-globe text-teal-400"></i>
-        <select id="langSelect" class="bg-transparent text-white text-sm outline-none font-medium cursor-pointer">
+        <select id="langSelect" onchange="updateLanguage()" class="bg-transparent text-white text-sm outline-none font-medium cursor-pointer">
+          <option value="English" selected class="bg-slate-800">English</option>
           <option value="Tamil" class="bg-slate-800">தமிழ் (Tamil)</option>
-          <option value="English" class="bg-slate-800">English</option>
         </select>
       </div>
     </div>
 
-    <p class="text-xs uppercase tracking-wider text-slate-400 mb-2 font-semibold">மாதிரிகள் / Quick Examples:</p>
+    <!-- Quick Example Buttons -->
+    <p id="uiExamplesLabel" class="text-xs uppercase tracking-wider text-slate-400 mb-2 font-semibold">Quick Examples / Try Asking:</p>
     <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
-      <button onclick="setQuery('வெங்காயம் நறுக்கும்போது ஏன் கண்ணீர் வருகிறது?')" class="bg-slate-800 hover:bg-slate-700 text-xs p-2.5 rounded-lg border border-slate-700 text-left transition">🧅 வெங்காயம் & கண்ணீர்</button>
-      <button onclick="setQuery('கொட்டாவி (yawn) ஏன் வருகிறது?')" class="bg-slate-800 hover:bg-slate-700 text-xs p-2.5 rounded-lg border border-slate-700 text-left transition">🥱 கொட்டாவி ஏன்?</button>
-      <button onclick="setQuery('சாப்பிட்ட பிறகு நெஞ்செரிச்சல் மற்றும் புளித்த ஏப்பம்')" class="bg-slate-800 hover:bg-slate-700 text-xs p-2.5 rounded-lg border border-slate-700 text-left transition">🔥 நெஞ்செரிச்சல் (GERD)</button>
-      <button onclick="setQuery('விக்கல் (hiccup) ஏன் வருகிறது? அதை நிறுத்த வழி')" class="bg-slate-800 hover:bg-slate-700 text-xs p-2.5 rounded-lg border border-slate-700 text-left transition">💨 விக்கல் தீர வழி</button>
+      <button id="exBtn1" onclick="setExample(1)" class="bg-slate-800 hover:bg-slate-700 text-xs p-2.5 rounded-lg border border-slate-700 text-left transition"></button>
+      <button id="exBtn2" onclick="setExample(2)" class="bg-slate-800 hover:bg-slate-700 text-xs p-2.5 rounded-lg border border-slate-700 text-left transition"></button>
+      <button id="exBtn3" onclick="setExample(3)" class="bg-slate-800 hover:bg-slate-700 text-xs p-2.5 rounded-lg border border-slate-700 text-left transition"></button>
+      <button id="exBtn4" onclick="setExample(4)" class="bg-slate-800 hover:bg-slate-700 text-xs p-2.5 rounded-lg border border-slate-700 text-left transition"></button>
     </div>
 
+    <!-- Input Text Area -->
     <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 shadow-lg mb-6">
-      <textarea id="userQuery" rows="3" class="w-full bg-slate-900 text-slate-100 p-3 rounded-xl border border-slate-700 focus:border-teal-400 outline-none text-sm placeholder-slate-500" placeholder="அறிகுறிகள் அல்லது எந்த ஒரு அறிவியல் கேள்வியையும் கேளுங்கள்... (e.g. Why do we sneeze? / தலைவலி ஏன் வருது?)"></textarea>
+      <textarea id="userQuery" rows="3" class="w-full bg-slate-900 text-slate-100 p-3 rounded-xl border border-slate-700 focus:border-teal-400 outline-none text-sm placeholder-slate-500"></textarea>
 
       <button id="submitBtn" onclick="askAI()" class="w-full mt-3 bg-teal-500 hover:bg-teal-600 text-slate-950 font-bold py-3 rounded-xl transition flex justify-center items-center gap-2 shadow-md">
-        <span>⚡ பதில் & வீடியோ காண்க (Get Answer & Video)</span>
+        <span id="uiSubmitText">⚡ Get Answer & Video</span>
       </button>
     </div>
 
+    <!-- Loading Spinner -->
     <div id="loading" class="hidden text-center py-8">
       <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-teal-400 border-t-transparent"></div>
-      <p class="text-sm text-slate-400 mt-2">விளக்கம் மற்றும் வீடியோ தயாராகிறது...</p>
+      <p id="uiLoadingText" class="text-sm text-slate-400 mt-2">Preparing explanation and video...</p>
     </div>
 
+    <!-- Results Section -->
     <div id="resultBox" class="hidden grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Left Column: Explanation -->
       <div class="md:col-span-2 bg-slate-800 p-6 rounded-2xl border border-slate-700 space-y-4">
         <h2 id="resTitle" class="text-xl font-bold text-teal-300"></h2>
         
         <div>
-          <h3 class="text-sm font-semibold text-slate-400 mb-1">📖 எளிய பதில்:</h3>
+          <h3 id="uiAnsLabel" class="text-sm font-semibold text-slate-400 mb-1">📖 Quick Answer:</h3>
           <p id="resAnswer" class="text-slate-200 text-sm leading-relaxed"></p>
         </div>
 
         <div>
-          <h3 class="text-sm font-semibold text-slate-400 mb-1">🔬 அறிவியல் / உயிரியல் காரணங்கள்:</h3>
+          <h3 id="uiReasonsLabel" class="text-sm font-semibold text-slate-400 mb-1">🔬 Scientific & Biological Reasons:</h3>
           <ul id="resPoints" class="list-disc list-inside text-sm text-slate-300 space-y-1"></ul>
         </div>
 
         <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/60">
-          <h3 class="text-xs font-semibold text-amber-400 mb-1">💡 சுவாரஸ்யமான உண்மை / குறிப்பு:</h3>
+          <h3 id="uiTipLabel" class="text-xs font-semibold text-amber-400 mb-1">💡 Fun Fact / Health Tip:</h3>
           <p id="resTip" class="text-slate-300 text-xs"></p>
         </div>
       </div>
 
+      <!-- Right Column: Video Launcher -->
       <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col justify-center items-center text-center">
         <div class="w-16 h-16 bg-red-600/20 text-red-500 rounded-full flex items-center justify-center text-2xl mb-3">
           <i class="fa-brands fa-youtube"></i>
         </div>
-        <h3 class="text-base font-bold text-white mb-2">இதற்கான விளக்கம் வீடியோ</h3>
+        <h3 id="uiVideoHeading" class="text-base font-bold text-white mb-2">Video Explanation</h3>
         <p id="videoTopic" class="text-xs text-slate-400 mb-4"></p>
 
         <a id="videoLink" href="#" target="_blank" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl transition flex items-center justify-center gap-2 shadow-lg">
           <i class="fa-solid fa-play"></i>
-          <span>வீடியோவை யூடியூபில் காண்க</span>
+          <span id="uiVideoBtn">Watch on YouTube</span>
         </a>
       </div>
     </div>
   </div>
 
   <script>
-    function setQuery(text) {
-      document.getElementById('userQuery').value = text;
+    // Translations Dictionary
+    const i18n = {
+      English: {
+        title: "🩺 AI Doctor & Science Explainer",
+        subtitle: "Medical Symptoms & Curious Science Explainer",
+        examplesLabel: "Quick Examples / Try Asking:",
+        ex1: "🧅 Onions & Tears",
+        ex1Query: "Why do onions make our eyes water when cutting them?",
+        ex2: "🥱 Why We Yawn",
+        ex2Query: "Why do humans yawn, and why is yawning contagious?",
+        ex3: "🔥 Acid Reflux (GERD)",
+        ex3Query: "Burning pain in chest and acid regurgitation after meals.",
+        ex4: "💨 Hiccup Relief",
+        ex4Query: "Why do we get hiccups and how to stop them quickly?",
+        placeholder: "Describe symptoms or ask ANY curious question (e.g. Why do we sneeze? / Reason for headache)...",
+        submitText: "⚡ Get Answer & Video",
+        loadingText: "Preparing explanation and video...",
+        ansLabel: "📖 Quick Answer:",
+        reasonsLabel: "🔬 Scientific & Biological Reasons:",
+        tipLabel: "💡 Fun Fact / Health Tip:",
+        videoHeading: "Video Explanation",
+        videoBtn: "Watch on YouTube"
+      },
+      Tamil: {
+        title: "🩺 AI மருத்துவ & அறிவியல் உதவியாளர்",
+        subtitle: "மருத்துவ அறிகுறிகள் & அறிவியல் விளக்கம்",
+        examplesLabel: "மாதிரிகள் / Quick Examples:",
+        ex1: "🧅 வெங்காயம் & கண்ணீர்",
+        ex1Query: "வெங்காயம் நறுக்கும்போது ஏன் கண்ணீர் வருகிறது?",
+        ex2: "🥱 கொட்டாவி ஏன்?",
+        ex2Query: "கொட்டாவி (yawn) ஏன் வருகிறது? ஒருவரை பார்த்தால் நமக்கும் ஏன் வருகிறது?",
+        ex3: "🔥 நெஞ்செரிச்சல் (GERD)",
+        ex3Query: "சாப்பிட்ட பிறகு நெஞ்சில் கடுமையான எரிச்சல் மற்றும் புளித்த ஏப்பம் வருவது ஏன்?",
+        ex4: "💨 விக்கல் தீர வழி",
+        ex4Query: "விக்கல் (hiccup) ஏன் வருகிறது? அதை நிறுத்த வழி என்ன?",
+        placeholder: "அறிகுறிகள் அல்லது எந்த ஒரு அறிவியல் கேள்வியையும் கேளுங்கள்... (e.g. தலைவலி ஏன் வருது?)",
+        submitText: "⚡ பதில் & வீடியோ காண்க (Get Answer & Video)",
+        loadingText: "விளக்கம் மற்றும் வீடியோ தயாராகிறது...",
+        ansLabel: "📖 எளிய பதில்:",
+        reasonsLabel: "🔬 அறிவியல் / உயிரியல் காரணங்கள்:",
+        tipLabel: "💡 சுவாரஸ்யமான உண்மை / குறிப்பு:",
+        videoHeading: "இதற்கான விளக்கம் வீடியோ",
+        videoBtn: "வீடியோவை யூடியூபில் காண்க"
+      }
+    };
+
+    function updateLanguage() {
+      const lang = document.getElementById('langSelect').value;
+      const t = i18n[lang];
+
+      document.getElementById('uiTitle').innerHTML = t.title;
+      document.getElementById('uiSubtitle').innerText = t.subtitle;
+      document.getElementById('uiExamplesLabel').innerText = t.examplesLabel;
+      document.getElementById('exBtn1').innerText = t.ex1;
+      document.getElementById('exBtn2').innerText = t.ex2;
+      document.getElementById('exBtn3').innerText = t.ex3;
+      document.getElementById('exBtn4').innerText = t.ex4;
+      document.getElementById('userQuery').placeholder = t.placeholder;
+      document.getElementById('uiSubmitText').innerText = t.submitText;
+      document.getElementById('uiLoadingText').innerText = t.loadingText;
+      document.getElementById('uiAnsLabel').innerText = t.ansLabel;
+      document.getElementById('uiReasonsLabel').innerText = t.reasonsLabel;
+      document.getElementById('uiTipLabel').innerText = t.tipLabel;
+      document.getElementById('uiVideoHeading').innerText = t.videoHeading;
+      document.getElementById('uiVideoBtn').innerText = t.videoBtn;
+    }
+
+    function setExample(num) {
+      const lang = document.getElementById('langSelect').value;
+      const t = i18n[lang];
+      document.getElementById('userQuery').value = t[`ex${num}Query`];
     }
 
     async function askAI() {
       const query = document.getElementById('userQuery').value.trim();
       const language = document.getElementById('langSelect').value;
-      if (!query) return alert('தயவுசெய்து ஏதேனும் கேள்வியை தட்டச்சு செய்யவும்.');
+      if (!query) return alert(language === 'Tamil' ? 'தயவுசெய்து ஏதேனும் கேள்வியை தட்டச்சு செய்யவும்.' : 'Please type a question or symptoms.');
 
       document.getElementById('loading').classList.remove('hidden');
       document.getElementById('resultBox').classList.add('hidden');
@@ -105,7 +182,9 @@
 
         const data = await response.json();
 
-        document.getElementById('resTitle').innerText = data.title_ta ? `${data.title_ta} (${data.title_en})` : data.title_en;
+        // Render result title based on selected language
+        const displayTitle = language === 'Tamil' && data.title_ta ? `${data.title_ta} (${data.title_en})` : data.title_en;
+        document.getElementById('resTitle').innerText = displayTitle;
         document.getElementById('resAnswer').innerText = data.answer;
         
         const pointsList = document.getElementById('resPoints');
@@ -122,11 +201,14 @@
 
         document.getElementById('resultBox').classList.remove('hidden');
       } catch (err) {
-        alert('பிழை ஏற்பட்டது: ' + err.message);
+        alert('Error: ' + err.message);
       } finally {
         document.getElementById('loading').classList.add('hidden');
       }
     }
+
+    // Initialize English on load
+    updateLanguage();
   </script>
 </body>
 </html>
