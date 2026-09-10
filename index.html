@@ -1,24 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
-  <style>
-  /* Completely hides Netlify badge / drawer */
-  #netlify-drawer,
-  [data-netlify-drawer],
-  .netlify-badge,
-  iframe[src*="netlify"],
-  div[id*="netlify"] {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-  }
-</style>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AI Doctor & Science Explainer</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    /* Hide Netlify badge */
+    #netlify-drawer, [data-netlify-drawer], .netlify-badge,
+    iframe[src*="netlify"], div[id*="netlify-identity"] {
+      display: none !important;
+    }
+  </style>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen p-4 md:p-8 font-sans">
 
@@ -26,13 +20,11 @@
     <!-- Header -->
     <div class="flex flex-col md:flex-row justify-between items-center mb-6 pb-4 border-b border-slate-700 gap-4">
       <div>
-        <h1 id="uiTitle" class="text-2xl md:text-3xl font-extrabold text-teal-400 flex items-center gap-2">
+        <h1 id="uiTitle" class="text-2xl md:text-3xl font-extrabold text-teal-400">
           🩺 AI Doctor & Science Explainer
         </h1>
         <p id="uiSubtitle" class="text-sm text-slate-400 mt-1">Medical Symptoms & Curious Science Explainer</p>
       </div>
-
-      <!-- Language Selector (English Default) -->
       <div class="flex items-center gap-2 bg-slate-800 p-2 rounded-xl border border-slate-700">
         <i class="fa-solid fa-globe text-teal-400"></i>
         <select id="langSelect" onchange="updateLanguage()" class="bg-transparent text-white text-sm outline-none font-medium cursor-pointer">
@@ -51,51 +43,44 @@
       <button id="exBtn4" onclick="setExample(4)" class="bg-slate-800 hover:bg-slate-700 text-xs p-2.5 rounded-lg border border-slate-700 text-left transition"></button>
     </div>
 
-    <!-- Input Text Area -->
+    <!-- Input -->
     <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 shadow-lg mb-6">
       <textarea id="userQuery" rows="3" class="w-full bg-slate-900 text-slate-100 p-3 rounded-xl border border-slate-700 focus:border-teal-400 outline-none text-sm placeholder-slate-500"></textarea>
-
-      <button id="submitBtn" onclick="askAI()" class="w-full mt-3 bg-teal-500 hover:bg-teal-600 text-slate-950 font-bold py-3 rounded-xl transition flex justify-center items-center gap-2 shadow-md">
+      <button onclick="askAI()" class="w-full mt-3 bg-teal-500 hover:bg-teal-600 text-slate-950 font-bold py-3 rounded-xl transition flex justify-center items-center gap-2 shadow-md">
         <span id="uiSubmitText">⚡ Get Answer & Video</span>
       </button>
     </div>
 
-    <!-- Loading Spinner -->
+    <!-- Loading -->
     <div id="loading" class="hidden text-center py-8">
       <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-teal-400 border-t-transparent"></div>
       <p id="uiLoadingText" class="text-sm text-slate-400 mt-2">Preparing explanation and video...</p>
     </div>
 
-    <!-- Results Section -->
+    <!-- Results -->
     <div id="resultBox" class="hidden grid grid-cols-1 md:grid-cols-3 gap-6">
-      <!-- Left Column: Explanation -->
       <div class="md:col-span-2 bg-slate-800 p-6 rounded-2xl border border-slate-700 space-y-4">
         <h2 id="resTitle" class="text-xl font-bold text-teal-300"></h2>
-        
         <div>
           <h3 id="uiAnsLabel" class="text-sm font-semibold text-slate-400 mb-1">📖 Quick Answer:</h3>
           <p id="resAnswer" class="text-slate-200 text-sm leading-relaxed"></p>
         </div>
-
         <div>
           <h3 id="uiReasonsLabel" class="text-sm font-semibold text-slate-400 mb-1">🔬 Scientific & Biological Reasons:</h3>
           <ul id="resPoints" class="list-disc list-inside text-sm text-slate-300 space-y-1"></ul>
         </div>
-
         <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/60">
           <h3 id="uiTipLabel" class="text-xs font-semibold text-amber-400 mb-1">💡 Fun Fact / Health Tip:</h3>
           <p id="resTip" class="text-slate-300 text-xs"></p>
         </div>
       </div>
 
-      <!-- Right Column: Video Launcher -->
       <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col justify-center items-center text-center">
         <div class="w-16 h-16 bg-red-600/20 text-red-500 rounded-full flex items-center justify-center text-2xl mb-3">
           <i class="fa-brands fa-youtube"></i>
         </div>
         <h3 id="uiVideoHeading" class="text-base font-bold text-white mb-2">Video Explanation</h3>
         <p id="videoTopic" class="text-xs text-slate-400 mb-4"></p>
-
         <a id="videoLink" href="#" target="_blank" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl transition flex items-center justify-center gap-2 shadow-lg">
           <i class="fa-solid fa-play"></i>
           <span id="uiVideoBtn">Watch on YouTube</span>
@@ -110,15 +95,11 @@
         title: "🩺 AI Doctor & Science Explainer",
         subtitle: "Medical Symptoms & Curious Science Explainer",
         examplesLabel: "Quick Examples / Try Asking:",
-        ex1: "🧅 Onions & Tears",
-        ex1Query: "Why do onions make our eyes water when cutting them?",
-        ex2: "🥱 Why We Yawn",
-        ex2Query: "Why do humans yawn, and why is yawning contagious?",
-        ex3: "🔥 Acid Reflux (GERD)",
-        ex3Query: "Burning pain in chest and acid regurgitation after meals.",
-        ex4: "💔 Heartbreak / Love Pain",
-        ex4Query: "What is love pain and why does heartbreak hurt physically?",
-        placeholder: "Describe symptoms or ask ANY curious question (e.g. Why do we sneeze? / What is love pain?)...",
+        ex1: "🧅 Onions & Tears", ex1Query: "Why do onions make our eyes water when cutting them?",
+        ex2: "🥱 Why We Yawn", ex2Query: "Why do humans yawn, and why is yawning contagious?",
+        ex3: "🔥 Acid Reflux", ex3Query: "Burning pain in chest and acid regurgitation after meals.",
+        ex4: "💔 Love Pain", ex4Query: "What is love pain and why does heartbreak hurt physically?",
+        placeholder: "Describe symptoms or ask ANY question (e.g. Why do we sneeze? / What is depression?)...",
         submitText: "⚡ Get Answer & Video",
         loadingText: "Preparing explanation and video...",
         ansLabel: "📖 Quick Answer:",
@@ -131,16 +112,12 @@
         title: "🩺 AI மருத்துவ & அறிவியல் உதவியாளர்",
         subtitle: "மருத்துவ அறிகுறிகள் & அறிவியல் விளக்கம்",
         examplesLabel: "மாதிரிகள் / Quick Examples:",
-        ex1: "🧅 வெங்காயம் & கண்ணீர்",
-        ex1Query: "வெங்காயம் நறுக்கும்போது ஏன் கண்ணீர் வருகிறது?",
-        ex2: "🥱 கொட்டாவி ஏன்?",
-        ex2Query: "கொட்டாவி (yawn) ஏன் வருகிறது? ஒருவரை பார்த்தால் நமக்கும் ஏன் வருகிறது?",
-        ex3: "🔥 நெஞ்செரிச்சல் (GERD)",
-        ex3Query: "சாப்பிட்ட பிறகு நெஞ்சில் கடுமையான எரிச்சல் மற்றும் புளித்த ஏப்பம் வருவது ஏன்?",
-        ex4: "💔 காதல் வலி (Heartbreak)",
-        ex4Query: "காதல் வலி என்றால் என்ன? மனக்காயம் ஏன் உடலிலும் வலிக்கிறது?",
-        placeholder: "அறிகுறிகள் அல்லது எந்த ஒரு அறிவியல் கேள்வியையும் கேளுங்கள்... (e.g. தலைவலி ஏன் வருது?)",
-        submitText: "⚡ பதில் & வீடியோ காண்க (Get Answer & Video)",
+        ex1: "🧅 வெங்காயம் & கண்ணீர்", ex1Query: "வெங்காயம் நறுக்கும்போது ஏன் கண்ணீர் வருகிறது?",
+        ex2: "🥱 கொட்டாவி ஏன்?", ex2Query: "கொட்டாவி (yawn) ஏன் வருகிறது? ஒருவரை பார்த்தால் நமக்கும் ஏன் வருகிறது?",
+        ex3: "🔥 நெஞ்செரிச்சல்", ex3Query: "சாப்பிட்ட பிறகு நெஞ்சில் கடுமையான எரிச்சல் மற்றும் புளித்த ஏப்பம் வருவது ஏன்?",
+        ex4: "💔 காதல் வலி", ex4Query: "காதல் வலி என்றால் என்ன? மனக்காயம் ஏன் உடலிலும் வலிக்கிறது?",
+        placeholder: "அறிகுறிகள் அல்லது எந்த ஒரு கேள்வியையும் கேளுங்கள்... (e.g. தலைவலி ஏன் வருது?)",
+        submitText: "⚡ பதில் & வீடியோ காண்க",
         loadingText: "விளக்கம் மற்றும் வீடியோ தயாராகிறது...",
         ansLabel: "📖 எளிய பதில்:",
         reasonsLabel: "🔬 அறிவியல் / உயிரியல் காரணங்கள்:",
@@ -153,7 +130,6 @@
     function updateLanguage() {
       const lang = document.getElementById('langSelect').value;
       const t = i18n[lang];
-
       document.getElementById('uiTitle').innerHTML = t.title;
       document.getElementById('uiSubtitle').innerText = t.subtitle;
       document.getElementById('uiExamplesLabel').innerText = t.examplesLabel;
@@ -173,8 +149,7 @@
 
     function setExample(num) {
       const lang = document.getElementById('langSelect').value;
-      const t = i18n[lang];
-      document.getElementById('userQuery').value = t[`ex${num}Query`];
+      document.getElementById('userQuery').value = i18n[lang][`ex${num}Query`];
     }
 
     async function askAI() {
@@ -186,49 +161,27 @@
       document.getElementById('resultBox').classList.add('hidden');
 
       try {
-        // Safe key decoding (never flagged by GitHub)
-        const _k = atob("QVEuQWI4Uk42TFo3NDk3SDhObmt3YUZkV3dSemRyQ1haRU9yX3dQMjdUVHA3T0VULWZ4NEE=");
-
-        const prompt = `
-        You are a friendly, witty, all-knowing AI Doctor and Science Explainer.
-        Answer this question: "${query}" in language: ${language}.
-        
-        Return strictly a valid JSON object matching this schema:
-        {
-          "title_en": "Title in English",
-          "title_ta": "Title in Tamil (தமிழ்)",
-          "answer": "Clear, engaging 2-sentence explanation in ${language}",
-          "why_it_happens": ["Biological/scientific cause 1 in ${language}", "Cause 2 in ${language}"],
-          "fun_fact_or_tip": "1 fun fact or tip in ${language}",
-          "youtube_search": "Exact search query for video"
-        }
-        Output ONLY valid JSON.
-        `;
-
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${_k}`;
-
-        const response = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { responseMimeType: "application/json" }
-          })
+        // Calls the secure Netlify backend (API key is hidden on server side)
+        const response = await fetch('/.netlify/functions/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query, language })
         });
 
         if (!response.ok) {
-          const errData = await response.json();
-          throw new Error(errData.error ? errData.error.message : 'API Request Failed');
+          const err = await response.json();
+          throw new Error(err.error || 'Server error');
         }
 
-        const data = await response.json();
-        const rawJson = data.candidates[0].content.parts[0].text;
-        const parsed = JSON.parse(rawJson);
+        const parsed = await response.json();
 
-        const displayTitle = language === 'Tamil' && parsed.title_ta ? `${parsed.title_ta} (${parsed.title_en})` : parsed.title_en;
+        const displayTitle = language === 'Tamil' && parsed.title_ta
+          ? `${parsed.title_ta} (${parsed.title_en})`
+          : parsed.title_en;
+
         document.getElementById('resTitle').innerText = displayTitle;
         document.getElementById('resAnswer').innerText = parsed.answer;
-        
+
         const pointsList = document.getElementById('resPoints');
         pointsList.innerHTML = '';
         const reasons = Array.isArray(parsed.why_it_happens) ? parsed.why_it_happens : [parsed.why_it_happens];
@@ -241,8 +194,8 @@
         document.getElementById('resTip').innerText = parsed.fun_fact_or_tip || '';
         document.getElementById('videoTopic').innerText = parsed.youtube_search || query;
         document.getElementById('videoLink').href = `https://www.youtube.com/results?search_query=${encodeURIComponent(parsed.youtube_search || query)}`;
-
         document.getElementById('resultBox').classList.remove('hidden');
+
       } catch (err) {
         alert('Error: ' + err.message);
       } finally {
@@ -250,7 +203,6 @@
       }
     }
 
-    // Initialize English on load
     updateLanguage();
   </script>
 </body>
